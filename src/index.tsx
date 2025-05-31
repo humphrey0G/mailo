@@ -5,19 +5,27 @@ import './index.css';
 import App from './App';
 
 function LandingPage() {
+  const navigateToApp = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.location.href = '/app';
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       {/* Hero Section */}
       <header className="container mx-auto px-4 py-16">
         <nav className="flex items-center justify-between mb-16">
-          <div className="flex items-center gap-2">
+          <a href="/" className="flex items-center gap-2">
             <Mail className="text-blue-600" size={32} />
             <span className="text-2xl font-bold text-gray-900">mailo</span>
-          </div>
+          </a>
           <div className="flex items-center gap-6">
             <a href="#features" className="text-gray-600 hover:text-gray-900">Features</a>
             <a href="#pricing" className="text-gray-600 hover:text-gray-900">Pricing</a>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+            <button 
+              onClick={navigateToApp}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            >
               Get Started
             </button>
           </div>
@@ -33,7 +41,7 @@ function LandingPage() {
           </p>
           <div className="flex items-center justify-center gap-4">
             <button 
-              onClick={() => window.location.href = '/app'} 
+              onClick={navigateToApp}
               className="bg-blue-600 text-white px-6 py-3 rounded-lg text-lg hover:bg-blue-700 flex items-center gap-2"
             >
               Try Mailo Now
@@ -108,7 +116,10 @@ function LandingPage() {
                   <span>Mobile App</span>
                 </li>
               </ul>
-              <button className="w-full py-2 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50">
+              <button 
+                onClick={navigateToApp}
+                className="w-full py-2 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50"
+              >
                 Get Started
               </button>
             </div>
@@ -133,7 +144,10 @@ function LandingPage() {
                   <span>Priority Support</span>
                 </li>
               </ul>
-              <button className="w-full py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50">
+              <button 
+                onClick={navigateToApp}
+                className="w-full py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50"
+              >
                 Try Pro Free
               </button>
             </div>
@@ -158,9 +172,12 @@ function LandingPage() {
                   <span>SLA Guarantee</span>
                 </li>
               </ul>
-              <button className="w-full py-2 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50">
+              <a 
+                href="mailto:sales@mailo.com"
+                className="block w-full py-2 text-center border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50"
+              >
                 Contact Sales
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -170,14 +187,14 @@ function LandingPage() {
       <footer className="bg-gray-900 text-white py-12">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <a href="/" className="flex items-center gap-2">
               <Mail size={24} />
               <span className="text-xl font-bold">mailo</span>
-            </div>
+            </a>
             <div className="flex items-center gap-6">
-              <a href="#" className="hover:text-blue-400">Terms</a>
-              <a href="#" className="hover:text-blue-400">Privacy</a>
-              <a href="#" className="hover:text-blue-400">Contact</a>
+              <a href="/terms" className="hover:text-blue-400">Terms</a>
+              <a href="/privacy" className="hover:text-blue-400">Privacy</a>
+              <a href="mailto:support@mailo.com" className="hover:text-blue-400">Contact</a>
             </div>
           </div>
           <div className="mt-8 text-center text-gray-400">
