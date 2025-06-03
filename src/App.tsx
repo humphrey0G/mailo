@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { Mail, Search, Settings, Plus, Star, Send, Archive, Trash, LogOut, User, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import Masonry from 'react-masonry-css';
 
 const emails = [
   {
     id: 1,
     subject: "Weekly Team Update",
     sender: "Sarah Johnson",
-    preview: "Here's a summary of what the team accomplished this week...",
+    preview: "Here's a summary of what the team accomplished this week. We made significant progress on the main features and resolved several critical bugs. The client feedback has been positive, and we're on track for the next milestone.",
     date: new Date(2023, 7, 15, 14, 30),
     unread: true,
   },
@@ -16,7 +17,7 @@ const emails = [
     id: 2,
     subject: "Project Milestone Achieved",
     sender: "David Chen",
-    preview: "I'm pleased to announce that we've successfully completed...",
+    preview: "I'm pleased to announce that we've successfully completed the first phase of the project. The team has shown exceptional dedication and skill throughout this period.",
     date: new Date(2023, 7, 15, 11, 15),
     unread: false,
   },
@@ -24,10 +25,50 @@ const emails = [
     id: 3,
     subject: "New Feature Release",
     sender: "Product Team",
-    preview: "We're excited to announce the launch of our latest feature...",
+    preview: "We're excited to announce the launch of our latest feature. This update includes performance improvements and new user-requested functionality.",
     date: new Date(2023, 7, 14, 16, 45),
     unread: true,
   },
+  {
+    id: 4,
+    subject: "Client Meeting Summary",
+    sender: "Emily White",
+    preview: "Following up on today's client meeting, here are the key points we discussed and the action items we need to address in the coming week.",
+    date: new Date(2023, 7, 14, 15, 20),
+    unread: true,
+  },
+  {
+    id: 5,
+    subject: "Design Review Feedback",
+    sender: "Alex Turner",
+    preview: "I've reviewed the latest design mockups and have some suggestions for improving the user flow. Let's discuss these changes in our next meeting.",
+    date: new Date(2023, 7, 14, 14, 10),
+    unread: false,
+  },
+  {
+    id: 6,
+    subject: "Q3 Planning Meeting",
+    sender: "Management Team",
+    preview: "Please find attached the agenda for our upcoming Q3 planning meeting. We'll be discussing our goals and strategies for the next quarter.",
+    date: new Date(2023, 7, 14, 11, 30),
+    unread: true,
+  },
+  {
+    id: 7,
+    subject: "System Maintenance Notice",
+    sender: "IT Department",
+    preview: "We will be performing scheduled maintenance this weekend. Please save your work and log out of all systems by Friday evening.",
+    date: new Date(2023, 7, 13, 17, 45),
+    unread: false,
+  },
+  {
+    id: 8,
+    subject: "Team Building Event",
+    sender: "HR Department",
+    preview: "Join us for our monthly team building event! This time we're planning an exciting virtual escape room experience.",
+    date: new Date(2023, 7, 13, 16, 20),
+    unread: true,
+  }
 ];
 
 function App() {
@@ -40,6 +81,12 @@ function App() {
   const handleLogout = () => {
     // Implement logout logic here
     console.log('Logging out...');
+  };
+
+  const breakpointColumns = {
+    default: 2,
+    1100: 2,
+    700: 1
   };
 
   return (
@@ -138,31 +185,52 @@ function App() {
         </header>
 
         {/* Email List */}
-        <div className="flex-1 overflow-auto">
-          {emails.map((email) => (
-            <div
-              key={email.id}
-              className="flex items-center gap-4 p-4 border-b hover:bg-gray-50 cursor-pointer"
-            >
-              <div className={`w-2 h-2 rounded-full ${email.unread ? 'bg-blue-600' : 'bg-transparent'}`} />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className={`font-medium ${email.unread ? 'text-gray-900' : 'text-gray-600'}`}>
-                    {email.sender}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {format(email.date, 'MMM d, h:mm a')}
-                  </span>
+        <div className="flex-1 overflow-auto p-6">
+          <Masonry
+            breakpointCols={breakpointColumns}
+            className="flex -ml-6 w-auto"
+            columnClassName="pl-6 bg-clip-padding"
+          >
+            {emails.map((email) => (
+              <div
+                key={email.id}
+                className="mb-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-200"
+              >
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      {email.unread && (
+                        <div className="w-2 h-2 rounded-full bg-blue-600" />
+                      )}
+                      <span className={`font-medium ${email.unread ? 'text-gray-900' : 'text-gray-600'}`}>
+                        {email.sender}
+                      </span>
+                    </div>
+                    <span className="text-sm text-gray-500">
+                      {format(email.date, 'MMM d, h:mm a')}
+                    </span>
+                  </div>
+                  <h3 className={`mb-2 ${email.unread ? 'font-semibold text-gray-900' : 'text-gray-600'}`}>
+                    {email.subject}
+                  </h3>
+                  <p className="text-sm text-gray-500 line-clamp-3">
+                    {email.preview}
+                  </p>
                 </div>
-                <h3 className={`truncate ${email.unread ? 'font-semibold text-gray-900' : 'text-gray-600'}`}>
-                  {email.subject}
-                </h3>
-                <p className="text-sm text-gray-500 truncate">
-                  {email.preview}
-                </p>
+                <div className="px-4 py-3 bg-gray-50 flex justify-end gap-2">
+                  <button className="p-1 hover:bg-gray-200 rounded">
+                    <Archive size={16} className="text-gray-600" />
+                  </button>
+                  <button className="p-1 hover:bg-gray-200 rounded">
+                    <Star size={16} className="text-gray-600" />
+                  </button>
+                  <button className="p-1 hover:bg-gray-200 rounded">
+                    <Trash size={16} className="text-gray-600" />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </Masonry>
         </div>
       </div>
     </div>
