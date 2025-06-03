@@ -1,6 +1,7 @@
-import React from 'react';
-import { Mail, Search, Settings, Plus, Star, Send, Archive, Trash } from 'lucide-react';
+import React, { useState } from 'react';
+import { Mail, Search, Settings, Plus, Star, Send, Archive, Trash, LogOut, User, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 
 const emails = [
   {
@@ -30,8 +31,60 @@ const emails = [
 ];
 
 function App() {
+  const [user] = useState({
+    name: 'John Doe',
+    email: 'john@example.com',
+    avatarUrl: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=32&h=32&dpr=2'
+  });
+
+  const handleLogout = () => {
+    // Implement logout logic here
+    console.log('Logging out...');
+  };
+
   return (
     <div className="h-screen flex">
+      {/* Brand Bar */}
+      <div className="w-16 bg-blue-600 flex flex-col items-center py-4">
+        <Mail className="text-white w-8 h-8 mb-8" />
+        <div className="flex-1" />
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger asChild>
+            <button className="w-10 h-10 rounded-full overflow-hidden hover:ring-2 hover:ring-white focus:outline-none">
+              <img
+                src={user.avatarUrl}
+                alt={user.name}
+                className="w-full h-full object-cover"
+              />
+            </button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content
+              className="min-w-[220px] bg-white rounded-lg shadow-lg p-2 mt-2"
+              sideOffset={5}
+              align="center"
+            >
+              <div className="px-2 py-2 mb-2">
+                <div className="font-medium">{user.name}</div>
+                <div className="text-sm text-gray-500">{user.email}</div>
+              </div>
+              <DropdownMenu.Separator className="h-px bg-gray-200 my-1" />
+              <DropdownMenu.Item className="flex items-center gap-2 px-2 py-2 text-gray-700 hover:bg-gray-100 rounded cursor-pointer">
+                <User size={16} />
+                <span>Account Settings</span>
+              </DropdownMenu.Item>
+              <DropdownMenu.Item 
+                className="flex items-center gap-2 px-2 py-2 text-red-600 hover:bg-gray-100 rounded cursor-pointer"
+                onClick={handleLogout}
+              >
+                <LogOut size={16} />
+                <span>Logout</span>
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu.Root>
+      </div>
+
       {/* Sidebar */}
       <div className="w-64 bg-gray-100 p-4 border-r">
         <button className="w-full bg-blue-600 text-white rounded-lg p-3 flex items-center justify-center gap-2 mb-6">
