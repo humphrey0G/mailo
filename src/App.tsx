@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Search, Settings, Plus, Star, Send, Archive, Trash, LogOut, User, ChevronDown } from 'lucide-react';
+import { Mail, Search, Settings, Plus, Star, Send, Archive, Trash, LogOut, User, Tag } from 'lucide-react';
 import { format } from 'date-fns';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import Masonry from 'react-masonry-css';
@@ -9,9 +9,10 @@ const emails = [
     id: 1,
     subject: "Weekly Team Update",
     sender: "Sarah Johnson",
-    preview: "Here's a summary of what the team accomplished this week. We made significant progress on the main features and resolved several critical bugs. The client feedback has been positive, and we're on track for the next milestone.",
+    preview: "Here's a summary of what the team accomplished this week. We made significant progress on the main features and resolved several critical bugs. The client feedback has been positive, and we're on track for the next milestone. The team has shown exceptional dedication, and I'm particularly impressed with how everyone handled the challenges we faced. Looking forward to our continued success in the coming weeks.",
     date: new Date(2023, 7, 15, 14, 30),
     unread: true,
+    tag: "team",
   },
   {
     id: 2,
@@ -20,6 +21,7 @@ const emails = [
     preview: "I'm pleased to announce that we've successfully completed the first phase of the project. The team has shown exceptional dedication and skill throughout this period.",
     date: new Date(2023, 7, 15, 11, 15),
     unread: false,
+    tag: "project",
   },
   {
     id: 3,
@@ -28,6 +30,7 @@ const emails = [
     preview: "We're excited to announce the launch of our latest feature. This update includes performance improvements and new user-requested functionality.",
     date: new Date(2023, 7, 14, 16, 45),
     unread: true,
+    tag: "product",
   },
   {
     id: 4,
@@ -36,6 +39,7 @@ const emails = [
     preview: "Following up on today's client meeting, here are the key points we discussed and the action items we need to address in the coming week.",
     date: new Date(2023, 7, 14, 15, 20),
     unread: true,
+    tag: "client",
   },
   {
     id: 5,
@@ -44,6 +48,7 @@ const emails = [
     preview: "I've reviewed the latest design mockups and have some suggestions for improving the user flow. Let's discuss these changes in our next meeting.",
     date: new Date(2023, 7, 14, 14, 10),
     unread: false,
+    tag: "design",
   },
   {
     id: 6,
@@ -52,6 +57,7 @@ const emails = [
     preview: "Please find attached the agenda for our upcoming Q3 planning meeting. We'll be discussing our goals and strategies for the next quarter.",
     date: new Date(2023, 7, 14, 11, 30),
     unread: true,
+    tag: "management",
   },
   {
     id: 7,
@@ -60,6 +66,7 @@ const emails = [
     preview: "We will be performing scheduled maintenance this weekend. Please save your work and log out of all systems by Friday evening.",
     date: new Date(2023, 7, 13, 17, 45),
     unread: false,
+    tag: "system",
   },
   {
     id: 8,
@@ -68,7 +75,18 @@ const emails = [
     preview: "Join us for our monthly team building event! This time we're planning an exciting virtual escape room experience.",
     date: new Date(2023, 7, 13, 16, 20),
     unread: true,
+    tag: "team",
   }
+];
+
+const colorTags = [
+  { id: 'team', name: 'Team', color: 'bg-blue-500' },
+  { id: 'project', name: 'Project', color: 'bg-green-500' },
+  { id: 'client', name: 'Client', color: 'bg-purple-500' },
+  { id: 'product', name: 'Product', color: 'bg-yellow-500' },
+  { id: 'design', name: 'Design', color: 'bg-pink-500' },
+  { id: 'management', name: 'Management', color: 'bg-red-500' },
+  { id: 'system', name: 'System', color: 'bg-gray-500' },
 ];
 
 function App() {
@@ -79,7 +97,6 @@ function App() {
   });
 
   const handleLogout = () => {
-    // Implement logout logic here
     console.log('Logging out...');
   };
 
@@ -88,6 +105,10 @@ function App() {
     1100: 2,
     700: 1
   };
+
+  // Sort emails by date and separate the most recent
+  const sortedEmails = [...emails].sort((a, b) => b.date.getTime() - a.date.getTime());
+  const [mostRecentEmail, ...otherEmails] = sortedEmails;
 
   return (
     <div className="h-screen flex">
@@ -133,13 +154,13 @@ function App() {
       </div>
 
       {/* Sidebar */}
-      <div className="w-64 bg-gray-100 p-4 border-r">
+      <div className="w-64 bg-gray-100 p-4 border-r flex flex-col">
         <button className="w-full bg-blue-600 text-white rounded-lg p-3 flex items-center justify-center gap-2 mb-6">
           <Plus size={20} />
           <span>Compose</span>
         </button>
         
-        <nav>
+        <nav className="mb-8">
           <ul className="space-y-2">
             <li className="flex items-center gap-3 p-2 bg-blue-100 rounded-lg text-blue-600">
               <Mail size={20} />
@@ -163,6 +184,22 @@ function App() {
             </li>
           </ul>
         </nav>
+
+        {/* Color Tags */}
+        <div className="mt-auto">
+          <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
+            <Tag size={16} />
+            Color Tags
+          </h3>
+          <div className="space-y-2">
+            {colorTags.map(tag => (
+              <div key={tag.id} className="flex items-center gap-2 p-2 hover:bg-gray-200 rounded-lg cursor-pointer">
+                <div className={`w-3 h-3 rounded-full ${tag.color}`} />
+                <span className="text-sm text-gray-700">{tag.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Main Content */}
@@ -186,12 +223,52 @@ function App() {
 
         {/* Email List */}
         <div className="flex-1 overflow-auto p-6">
+          {/* Featured Email */}
+          <div className="mb-8 bg-white rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-200">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  {mostRecentEmail.unread && (
+                    <div className="w-2 h-2 rounded-full bg-blue-600" />
+                  )}
+                  <span className="font-medium text-lg text-gray-900">
+                    {mostRecentEmail.sender}
+                  </span>
+                  <div className={`px-2 py-1 rounded-full text-xs ${colorTags.find(t => t.id === mostRecentEmail.tag)?.color.replace('bg-', 'bg-opacity-20 text-')}`}>
+                    {colorTags.find(t => t.id === mostRecentEmail.tag)?.name}
+                  </div>
+                </div>
+                <span className="text-sm text-gray-500">
+                  {format(mostRecentEmail.date, 'MMM d, h:mm a')}
+                </span>
+              </div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-3">
+                {mostRecentEmail.subject}
+              </h2>
+              <p className="text-gray-600 mb-4 line-clamp-4">
+                {mostRecentEmail.preview}
+              </p>
+              <div className="flex justify-end gap-2">
+                <button className="p-2 hover:bg-gray-100 rounded-lg">
+                  <Archive size={18} className="text-gray-600" />
+                </button>
+                <button className="p-2 hover:bg-gray-100 rounded-lg">
+                  <Star size={18} className="text-gray-600" />
+                </button>
+                <button className="p-2 hover:bg-gray-100 rounded-lg">
+                  <Trash size={18} className="text-gray-600" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Other Emails */}
           <Masonry
             breakpointCols={breakpointColumns}
             className="flex -ml-6 w-auto"
             columnClassName="pl-6 bg-clip-padding"
           >
-            {emails.map((email) => (
+            {otherEmails.map((email) => (
               <div
                 key={email.id}
                 className="mb-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-200"
@@ -205,6 +282,9 @@ function App() {
                       <span className={`font-medium ${email.unread ? 'text-gray-900' : 'text-gray-600'}`}>
                         {email.sender}
                       </span>
+                      <div className={`px-2 py-0.5 rounded-full text-xs ${colorTags.find(t => t.id === email.tag)?.color.replace('bg-', 'bg-opacity-20 text-')}`}>
+                        {colorTags.find(t => t.id === email.tag)?.name}
+                      </div>
                     </div>
                     <span className="text-sm text-gray-500">
                       {format(email.date, 'MMM d, h:mm a')}
