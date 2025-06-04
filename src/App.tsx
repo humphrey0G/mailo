@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Mail, Search, Settings, Plus, Star, Send, Archive, Trash, LogOut, User, Tag } from 'lucide-react';
+import { Mail, Search, Settings, Plus, Star, Send, Archive, Trash, LogOut, User, Tag, Mic, Brain, Power } from 'lucide-react';
 import { format } from 'date-fns';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import * as Toggle from '@radix-ui/react-toggle';
 import Masonry from 'react-masonry-css';
 
 const emails = [
@@ -96,8 +97,21 @@ function App() {
     avatarUrl: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=32&h=32&dpr=2'
   });
 
+  const [isAutoPilot, setIsAutoPilot] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+
   const handleLogout = () => {
     console.log('Logging out...');
+  };
+
+  const toggleAutoPilot = () => {
+    setIsAutoPilot(!isAutoPilot);
+  };
+
+  const startVoiceSearch = () => {
+    setIsListening(true);
+    // Voice recognition logic would go here
+    setTimeout(() => setIsListening(false), 2000);
   };
 
   const breakpointColumns = {
@@ -206,15 +220,29 @@ function App() {
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <header className="h-16 border-b flex items-center justify-between px-6">
-          <div className="flex-1 max-w-2xl">
-            <div className="relative">
+          <div className="flex-1 max-w-2xl flex items-center gap-4">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="text"
-                placeholder="Search emails..."
-                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Search emails or ask AI assistant..."
+                className="w-full pl-10 pr-12 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              <button 
+                className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-1.5 rounded-full ${isListening ? 'bg-red-100 text-red-600' : 'hover:bg-gray-100'}`}
+                onClick={startVoiceSearch}
+              >
+                <Mic size={18} />
+              </button>
             </div>
+            <Toggle.Root
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${isAutoPilot ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}`}
+              pressed={isAutoPilot}
+              onPressedChange={toggleAutoPilot}
+            >
+              <Power size={18} />
+              <span className="text-sm font-medium">Auto-Pilot</span>
+            </Toggle.Root>
           </div>
           <button className="p-2 hover:bg-gray-100 rounded-lg">
             <Settings size={20} className="text-gray-600" />
