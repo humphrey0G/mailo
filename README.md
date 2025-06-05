@@ -170,18 +170,6 @@ npm run dev
 
 ---
 
-## 🏆 **What People Are Saying**
-
-> *"Mailo doesn't just handle my email—it makes me better at communication. The AI suggestions are scary good."*  
-> **Sarah Chen, CEO @ TechStart**
-
-> *"I processed 500+ emails in 2 hours. My previous record was 8 hours for the same volume."*  
-> **Marcus Rodriguez, Sales Director**
-
-> *"The contact intelligence feature is like having a personal assistant who knows everyone."*  
-> **Dr. Amy Watson, Researcher**
-
----
 
 ## 🤝 **Join the Movement**
 
