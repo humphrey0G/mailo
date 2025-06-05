@@ -164,7 +164,7 @@ npm run dev
 ```
 
 ### For Beta Users
-1. **[Join the Waitlist](https://mailo.app/beta)** - Get early access
+1. **[Join the Waitlist](https://mailowork.space/beta)** - Get early access
 2. **[Discord Community](https://discord.gg/mailo)** - Shape the product
 3. **[Follow Development](https://twitter.com/MailoApp)** - Daily updates
 
@@ -207,16 +207,16 @@ Mailo is built for teams that demand the highest security standards:
 - **Advanced Threat Protection**
 - **Data Loss Prevention**
 
-[Contact Enterprise Sales →](mailto:enterprise@mailo.app)
+[Contact Enterprise Sales →](mailto:enterprise@mailowork.space)
 
 ---
 
 ## 📱 **Download & Connect**
 
-- **Web App**: [app.mailo.com](https://app.mailo.com)
+- **Web App**: [app.mailowork.space](https://app.mailowork.space)
 - **iOS**: [App Store](https://apps.apple.com/app/mailo) (Coming Soon)
 - **Android**: [Play Store](https://play.google.com/store/apps/details?id=com.mailo) (Coming Soon)
-- **Desktop**: [Windows](https://mailo.app/download/windows) | [macOS](https://mailo.app/download/mac) | [Linux](https://mailo.app/download/linux)
+- **Desktop**: [Windows](https://mailowork.space/download/windows) | [macOS](https://mailowork.space/download/mac) | [Linux](https://mailowork.space/download/linux)
 
 ### Stay Connected
 - 🐦 **Twitter**: [@MailoApp](https://twitter.com/MailoApp)
@@ -229,9 +229,9 @@ Mailo is built for teams that demand the highest security standards:
 ## 📄 **Legal & Licensing**
 
 - **License**: MIT (Open Source Forever)
-- **Privacy Policy**: [mailo.app/privacy](https://mailo.app/privacy)
-- **Terms of Service**: [mailo.app/terms](https://mailo.app/terms)
-- **Security**: [security@mailo.app](mailto:security@mailo.app)
+- **Privacy Policy**: [mailowork.space/privacy](https://mailowork.space/privacy)
+- **Terms of Service**: [mailowork.space/terms](https://mailowork.space/terms)
+- **Security**: [security@mailowork.space](mailto:security@mailowork.space)
 
 ---
 
@@ -239,7 +239,7 @@ Mailo is built for teams that demand the highest security standards:
 
 ## 🌟 **Ready to Transform Your Email Experience?**
 
-### [🚀 **Start Your Journey**](https://mailo.app/get-started) • [⭐ **Star This Repo**](https://github.com/yourusername/mailo) • [🎉 **Join Discord**](https://discord.gg/mailo)
+### [🚀 **Start Your Journey**](https://mailowork.space/get-started) • [⭐ **Star This Repo**](https://github.com/yourusername/mailo) • [🎉 **Join Discord**](https://discord.gg/mailo)
 
 ---
 
