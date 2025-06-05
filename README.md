@@ -193,11 +193,11 @@ npm run dev
 
 ### 💡 **For Feature Requests**
 Have an idea that could change email forever? 
-[Share it here →](https://github.com/yourusername/mailo/discussions/new?category=ideas)
+[Share it here →](https://github.com/humphrey0G/mailo/discussions/new?category=ideas)
 
 ### 🐛 **For Bug Hunters**
 Help us perfect the future:
-[Report bugs →](https://github.com/yourusername/mailo/issues/new?template=bug_report.md)
+[Report bugs →](https://github.com/humphrey0G/mailo/issues/new?template=bug_report.md)
 
 ---
 
