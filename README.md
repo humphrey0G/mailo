@@ -149,7 +149,7 @@ We're building Mailo transparently. Watch our progress and contribute to the fut
 ### For Developers
 ```bash
 # Clone the future
-git clone https://github.com/yourusername/mailo.git
+git clone https://github.com/humphrey0G/mailo.git
 cd mailo
 
 # Install dependencies
