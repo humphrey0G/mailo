@@ -3,48 +3,31 @@ import { Mail, Search, Settings, Plus, Star, Send, Archive, Trash, LogOut, User,
 import { format } from 'date-fns';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import * as Toggle from '@radix-ui/react-toggle';
-import * as Dialog from '@radix-ui/react-dialog';
 import Masonry from 'react-masonry-css';
-import { useAuth } from './contexts/AuthContext';
 import { Auth } from './components/Auth';
-import { useEmail } from './hooks/useEmail';
+import { EmailSetup } from './components/EmailSetup';
+import { useAuth } from './contexts/AuthContext';
 import { supabase } from './lib/supabase';
 
 function App() {
   const { user, loading: authLoading } = useAuth();
-  const [emailSettings, setEmailSettings] = useState<any>(null);
+  const [hasEmailSetup, setHasEmailSetup] = useState(false);
   const [isAutoPilot, setIsAutoPilot] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [showEmailSetup, setShowEmailSetup] = useState(false);
-
-  const { emails, loading: emailsLoading, error, fetchEmails } = useEmail(
-    emailSettings?.provider,
-    {
-      user: emailSettings?.email,
-      password: emailSettings?.settings?.password,
-    }
-  );
 
   useEffect(() => {
     if (user) {
-      fetchEmailSettings();
+      // Check if user has email settings
+      supabase
+        .from('email_settings')
+        .select('id')
+        .eq('user_id', user.id)
+        .single()
+        .then(({ data }) => {
+          setHasEmailSetup(!!data);
+        });
     }
   }, [user]);
-
-  const fetchEmailSettings = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('email_settings')
-        .select('*')
-        .eq('user_id', user?.id)
-        .single();
-
-      if (error) throw error;
-      setEmailSettings(data);
-    } catch (error) {
-      console.error('Error fetching email settings:', error);
-    }
-  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -62,7 +45,7 @@ function App() {
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
@@ -71,24 +54,8 @@ function App() {
     return <Auth />;
   }
 
-  if (!emailSettings) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full p-8 bg-white rounded-xl shadow-lg text-center">
-          <Mail className="mx-auto text-blue-600 mb-4" size={48} />
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Set Up Your Email</h2>
-          <p className="text-gray-600 mb-8">
-            Connect your email account to get started with Mailo
-          </p>
-          <button
-            onClick={() => setShowEmailSetup(true)}
-            className="w-full bg-blue-600 text-white rounded-lg py-3 hover:bg-blue-700"
-          >
-            Connect Email Account
-          </button>
-        </div>
-      </div>
-    );
+  if (!hasEmailSetup) {
+    return <EmailSetup />;
   }
 
   const breakpointColumns = {
