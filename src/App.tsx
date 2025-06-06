@@ -9,11 +9,52 @@ import { EmailSetup } from './components/EmailSetup';
 import { useAuth } from './contexts/AuthContext';
 import { supabase } from './lib/supabase';
 
+// Mock data for development
+const mockEmails = [
+  {
+    id: '1',
+    sender: 'John Doe',
+    subject: 'Project Update',
+    preview: 'Here is the latest update on our project progress...',
+    date: new Date().toISOString(),
+    unread: true,
+    tag: 'work'
+  },
+  {
+    id: '2',
+    sender: 'Sarah Wilson',
+    subject: 'Meeting Tomorrow',
+    preview: 'Just a reminder about our meeting scheduled for tomorrow at 2 PM...',
+    date: new Date(Date.now() - 86400000).toISOString(),
+    unread: false,
+    tag: 'important'
+  },
+  {
+    id: '3',
+    sender: 'Newsletter',
+    subject: 'Weekly Tech News',
+    preview: 'This week in technology: AI advances, new frameworks, and more...',
+    date: new Date(Date.now() - 172800000).toISOString(),
+    unread: false,
+    tag: 'newsletter'
+  }
+];
+
+const colorTags = [
+  { id: 'work', name: 'Work', color: 'bg-blue-500' },
+  { id: 'important', name: 'Important', color: 'bg-red-500' },
+  { id: 'newsletter', name: 'Newsletter', color: 'bg-green-500' },
+  { id: 'personal', name: 'Personal', color: 'bg-purple-500' }
+];
+
 function App() {
   const { user, loading: authLoading } = useAuth();
   const [hasEmailSetup, setHasEmailSetup] = useState(false);
   const [isAutoPilot, setIsAutoPilot] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [emails] = useState(mockEmails);
+  const [emailsLoading] = useState(false);
+  const [error] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -25,6 +66,10 @@ function App() {
         .single()
         .then(({ data }) => {
           setHasEmailSetup(!!data);
+        })
+        .catch(() => {
+          // If no email settings found, user needs to set up
+          setHasEmailSetup(false);
         });
     }
   }, [user]);
@@ -55,7 +100,7 @@ function App() {
   }
 
   if (!hasEmailSetup) {
-    return <EmailSetup />;
+    return <EmailSetup onSetupComplete={() => setHasEmailSetup(true)} />;
   }
 
   const breakpointColumns = {
@@ -63,6 +108,16 @@ function App() {
     1100: 2,
     700: 1
   };
+
+  // Generate a default avatar URL if user doesn't have one
+  const avatarUrl = user.user_metadata?.avatar_url || 
+                   user.user_metadata?.picture || 
+                   `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email || 'User')}&background=3b82f6&color=fff`;
+
+  const userName = user.user_metadata?.full_name || 
+                   user.user_metadata?.name || 
+                   user.email?.split('@')[0] || 
+                   'User';
 
   return (
     <div className="h-screen flex">
@@ -74,9 +129,13 @@ function App() {
           <DropdownMenu.Trigger asChild>
             <button className="w-10 h-10 rounded-full overflow-hidden hover:ring-2 hover:ring-white focus:outline-none">
               <img
-                src={user.avatarUrl}
-                alt={user.name}
+                src={avatarUrl}
+                alt={userName}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  // Fallback if image fails to load
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email || 'User')}&background=3b82f6&color=fff`;
+                }}
               />
             </button>
           </DropdownMenu.Trigger>
@@ -87,7 +146,7 @@ function App() {
               align="center"
             >
               <div className="px-2 py-2 mb-2">
-                <div className="font-medium">{user.name}</div>
+                <div className="font-medium">{userName}</div>
                 <div className="text-sm text-gray-500">{user.email}</div>
               </div>
               <DropdownMenu.Separator className="h-px bg-gray-200 my-1" />
@@ -120,19 +179,19 @@ function App() {
               <Mail size={20} />
               <span>Inbox</span>
             </li>
-            <li className="flex items-center gap-3 p-2 text-gray-700 hover:bg-gray-200 rounded-lg">
+            <li className="flex items-center gap-3 p-2 text-gray-700 hover:bg-gray-200 rounded-lg cursor-pointer">
               <Star size={20} />
               <span>Starred</span>
             </li>
-            <li className="flex items-center gap-3 p-2 text-gray-700 hover:bg-gray-200 rounded-lg">
+            <li className="flex items-center gap-3 p-2 text-gray-700 hover:bg-gray-200 rounded-lg cursor-pointer">
               <Send size={20} />
               <span>Sent</span>
             </li>
-            <li className="flex items-center gap-3 p-2 text-gray-700 hover:bg-gray-200 rounded-lg">
+            <li className="flex items-center gap-3 p-2 text-gray-700 hover:bg-gray-200 rounded-lg cursor-pointer">
               <Archive size={20} />
               <span>Archive</span>
             </li>
-            <li className="flex items-center gap-3 p-2 text-gray-700 hover:bg-gray-200 rounded-lg">
+            <li className="flex items-center gap-3 p-2 text-gray-700 hover:bg-gray-200 rounded-lg cursor-pointer">
               <Trash size={20} />
               <span>Trash</span>
             </li>
@@ -209,48 +268,53 @@ function App() {
               className="flex -ml-6 w-auto"
               columnClassName="pl-6 bg-clip-padding"
             >
-              {emails.map((email) => (
-                <div
-                  key={email.id}
-                  className="mb-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-200"
-                >
-                  <div className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        {email.unread && (
-                          <div className="w-2 h-2 rounded-full bg-blue-600" />
-                        )}
-                        <span className={`font-medium ${email.unread ? 'text-gray-900' : 'text-gray-600'}`}>
-                          {email.sender}
-                        </span>
-                        <div className={`px-2 py-0.5 rounded-full text-xs ${colorTags.find(t => t.id === email.tag)?.color.replace('bg-', 'bg-opacity-20 text-')}`}>
-                          {colorTags.find(t => t.id === email.tag)?.name}
+              {emails.map((email) => {
+                const emailTag = colorTags.find(t => t.id === email.tag);
+                return (
+                  <div
+                    key={email.id}
+                    className="mb-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-200"
+                  >
+                    <div className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          {email.unread && (
+                            <div className="w-2 h-2 rounded-full bg-blue-600" />
+                          )}
+                          <span className={`font-medium ${email.unread ? 'text-gray-900' : 'text-gray-600'}`}>
+                            {email.sender}
+                          </span>
+                          {emailTag && (
+                            <div className={`px-2 py-0.5 rounded-full text-xs text-white ${emailTag.color}`}>
+                              {emailTag.name}
+                            </div>
+                          )}
                         </div>
+                        <span className="text-sm text-gray-500">
+                          {format(new Date(email.date), 'MMM d, h:mm a')}
+                        </span>
                       </div>
-                      <span className="text-sm text-gray-500">
-                        {format(new Date(email.date), 'MMM d, h:mm a')}
-                      </span>
+                      <h3 className={`mb-2 ${email.unread ? 'font-semibold text-gray-900' : 'text-gray-600'}`}>
+                        {email.subject}
+                      </h3>
+                      <p className="text-sm text-gray-500 line-clamp-3">
+                        {email.preview}
+                      </p>
                     </div>
-                    <h3 className={`mb-2 ${email.unread ? 'font-semibold text-gray-900' : 'text-gray-600'}`}>
-                      {email.subject}
-                    </h3>
-                    <p className="text-sm text-gray-500 line-clamp-3">
-                      {email.preview}
-                    </p>
+                    <div className="px-4 py-3 bg-gray-50 flex justify-end gap-2">
+                      <button className="p-1 hover:bg-gray-200 rounded">
+                        <Archive size={16} className="text-gray-600" />
+                      </button>
+                      <button className="p-1 hover:bg-gray-200 rounded">
+                        <Star size={16} className="text-gray-600" />
+                      </button>
+                      <button className="p-1 hover:bg-gray-200 rounded">
+                        <Trash size={16} className="text-gray-600" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="px-4 py-3 bg-gray-50 flex justify-end gap-2">
-                    <button className="p-1 hover:bg-gray-200 rounded">
-                      <Archive size={16} className="text-gray-600" />
-                    </button>
-                    <button className="p-1 hover:bg-gray-200 rounded">
-                      <Star size={16} className="text-gray-600" />
-                    </button>
-                    <button className="p-1 hover:bg-gray-200 rounded">
-                      <Trash size={16} className="text-gray-600" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </Masonry>
           )}
         </div>
