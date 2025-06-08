@@ -47,6 +47,24 @@ const mockEmails = [
     date: new Date(Date.now() - 259200000).toISOString(),
     unread: true,
     tag: 'personal'
+  },
+  {
+    id: '5',
+    sender: 'GitHub',
+    subject: 'Security Alert',
+    preview: 'We detected a new sign-in to your GitHub account from a new device. If this was you, you can safely ignore this email.',
+    date: new Date(Date.now() - 345600000).toISOString(),
+    unread: false,
+    tag: 'work'
+  },
+  {
+    id: '6',
+    sender: 'LinkedIn',
+    subject: 'You have 3 new connection requests',
+    preview: 'Connect with professionals in your network and expand your career opportunities.',
+    date: new Date(Date.now() - 432000000).toISOString(),
+    unread: true,
+    tag: 'work'
   }
 ];
 
@@ -62,6 +80,7 @@ const defaultSettings: SettingsData = {
   viewMode: 'list',
   signature: '',
   vacationMessage: '',
+  developerMode: true,
   aiPersonality: {
     knowledge: '',
     character: '',
@@ -126,6 +145,14 @@ function App() {
 
   const handleBackToList = () => {
     setSelectedEmail(null);
+  };
+
+  const handleSettingsChange = (newSettings: SettingsData) => {
+    setSettings(newSettings);
+    // If switching to list mode, clear selected email
+    if (newSettings.viewMode === 'list') {
+      setSelectedEmail(null);
+    }
   };
 
   if (authLoading) {
@@ -387,7 +414,7 @@ function App() {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         settings={settings}
-        onSettingsChange={setSettings}
+        onSettingsChange={handleSettingsChange}
       />
     </div>
   );
