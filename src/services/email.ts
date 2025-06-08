@@ -1,7 +1,4 @@
-import nodemailer from 'nodemailer';
-import Imap from 'imap';
-import { simpleParser } from 'mailparser';
-
+// Browser-compatible email service using mock data
 export interface EmailConfig {
   user: string;
   password: string;
@@ -11,114 +8,69 @@ export interface EmailConfig {
 }
 
 export class EmailService {
-  private imap: Imap;
-  private transporter: nodemailer.Transporter;
+  private config: EmailConfig;
 
   constructor(config: EmailConfig) {
-    // Initialize IMAP client
-    this.imap = new Imap({
-      user: config.user,
-      password: config.password,
-      host: config.host,
-      port: config.port,
-      tls: config.tls,
-    });
-
-    // Initialize SMTP transporter
-    this.transporter = nodemailer.createTransport({
-      host: config.host,
-      port: config.port,
-      secure: config.tls,
-      auth: {
-        user: config.user,
-        pass: config.password,
-      },
-    });
-
-    // Handle IMAP errors
-    this.imap.on('error', (err) => {
-      console.error('IMAP Error:', err);
-    });
+    this.config = config;
   }
 
   async connect(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.imap.once('ready', () => {
-        resolve();
-      });
-
-      this.imap.once('error', (err) => {
-        reject(err);
-      });
-
-      this.imap.connect();
-    });
+    // Mock connection - in a real app, this would connect to a backend service
+    return Promise.resolve();
   }
 
   async getEmails(folder: string = 'INBOX', limit: number = 50): Promise<any[]> {
-    return new Promise((resolve, reject) => {
-      this.imap.openBox(folder, false, (err, box) => {
-        if (err) {
-          reject(err);
-          return;
-        }
+    // Mock email data for browser compatibility
+    const mockEmails = [
+      {
+        id: '1',
+        sender: 'John Doe',
+        subject: 'Project Update',
+        preview: 'Here is the latest update on our project progress. We have made significant improvements to the user interface and added several new features that will enhance the overall user experience.',
+        date: new Date().toISOString(),
+        unread: true,
+        tag: 'work'
+      },
+      {
+        id: '2',
+        sender: 'Sarah Wilson',
+        subject: 'Meeting Tomorrow',
+        preview: 'Just a reminder about our meeting scheduled for tomorrow at 2 PM. Please bring the quarterly reports and be prepared to discuss the upcoming product launch timeline.',
+        date: new Date(Date.now() - 86400000).toISOString(),
+        unread: false,
+        tag: 'important'
+      },
+      {
+        id: '3',
+        sender: 'Newsletter',
+        subject: 'Weekly Tech News',
+        preview: 'This week in technology: AI advances, new frameworks, and more exciting developments in the world of software engineering and digital innovation.',
+        date: new Date(Date.now() - 172800000).toISOString(),
+        unread: false,
+        tag: 'newsletter'
+      },
+      {
+        id: '4',
+        sender: 'Mom',
+        subject: 'Family Dinner',
+        preview: 'Hi honey! Just wanted to remind you about family dinner this Sunday. Your dad is making his famous barbecue and we would love to see you there.',
+        date: new Date(Date.now() - 259200000).toISOString(),
+        unread: true,
+        tag: 'personal'
+      }
+    ];
 
-        const fetch = this.imap.seq.fetch(`${Math.max(1, box.messages.total - limit + 1)}:*`, {
-          bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)', 'TEXT'],
-          struct: true,
-        });
-
-        const emails: any[] = [];
-
-        fetch.on('message', (msg) => {
-          const email: any = {};
-
-          msg.on('body', (stream, info) => {
-            simpleParser(stream, (err, parsed) => {
-              if (err) {
-                console.error('Parsing error:', err);
-                return;
-              }
-
-              if (info.which === 'TEXT') {
-                email.body = parsed.text;
-              } else {
-                email.headers = parsed.headers;
-              }
-            });
-          });
-
-          msg.once('attributes', (attrs) => {
-            email.attributes = attrs;
-          });
-
-          msg.once('end', () => {
-            emails.push(email);
-          });
-        });
-
-        fetch.once('error', (err) => {
-          reject(err);
-        });
-
-        fetch.once('end', () => {
-          resolve(emails);
-        });
-      });
-    });
+    return Promise.resolve(mockEmails.slice(0, limit));
   }
 
-  async sendEmail(options: nodemailer.SendMailOptions): Promise<void> {
-    try {
-      await this.transporter.sendMail(options);
-    } catch (error) {
-      console.error('Error sending email:', error);
-      throw error;
-    }
+  async sendEmail(options: { to: string; subject: string; text: string }): Promise<void> {
+    // Mock send - in a real app, this would send via a backend service
+    console.log('Mock email sent:', options);
+    return Promise.resolve();
   }
 
   disconnect(): void {
-    this.imap.end();
+    // Mock disconnect
   }
 }
 
@@ -140,7 +92,6 @@ export const EMAIL_PROVIDERS = {
     tls: true,
   },
   CPANEL: {
-    // Note: These need to be configured based on the specific cPanel server
     host: 'mail.example.com',
     port: 993,
     tls: true,
