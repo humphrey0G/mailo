@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Search, Settings, Plus, Star, Send, Archive, Trash, LogOut, User, Tag, Mic, Power } from 'lucide-react';
-import { format } from 'date-fns';
+import { Mail, Search, Settings as SettingsIcon, Plus, Star, Send, Archive, Trash, LogOut, User, Tag, Mic, Power } from 'lucide-react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import * as Toggle from '@radix-ui/react-toggle';
-import Masonry from 'react-masonry-css';
 import { Auth } from './components/Auth';
 import { EmailSetup } from './components/EmailSetup';
+import { Settings, SettingsData } from './components/Settings';
+import { EmailList } from './components/EmailList';
+import { EmailDetail } from './components/EmailDetail';
 import { useAuth } from './contexts/AuthContext';
 import { supabase } from './lib/supabase';
 
@@ -56,11 +57,27 @@ const colorTags = [
   { id: 'personal', name: 'Personal', color: 'bg-purple-500' }
 ];
 
+const defaultSettings: SettingsData = {
+  emailLayout: 'bento',
+  viewMode: 'list',
+  signature: '',
+  vacationMessage: '',
+  aiPersonality: {
+    knowledge: '',
+    character: '',
+    careerJourney: '',
+    inboxExpectations: ''
+  }
+};
+
 function App() {
   const { user, loading: authLoading } = useAuth();
   const [hasEmailSetup, setHasEmailSetup] = useState(false);
   const [isAutoPilot, setIsAutoPilot] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settings, setSettings] = useState<SettingsData>(defaultSettings);
+  const [selectedEmail, setSelectedEmail] = useState<typeof mockEmails[0] | null>(null);
   const [emails] = useState(mockEmails);
   const [emailsLoading] = useState(false);
   const [error] = useState(null);
@@ -81,7 +98,6 @@ function App() {
         })
         .catch((error) => {
           console.error('Error in email settings check:', error);
-          // If no email settings found, user needs to set up
           setHasEmailSetup(false);
         });
     }
@@ -104,6 +120,14 @@ function App() {
     setTimeout(() => setIsListening(false), 2000);
   };
 
+  const handleEmailSelect = (email: typeof mockEmails[0]) => {
+    setSelectedEmail(email);
+  };
+
+  const handleBackToList = () => {
+    setSelectedEmail(null);
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -123,12 +147,6 @@ function App() {
     return <EmailSetup onSetupComplete={() => setHasEmailSetup(true)} />;
   }
 
-  const breakpointColumns = {
-    default: 2,
-    1100: 2,
-    700: 1
-  };
-
   // Generate a default avatar URL if user doesn't have one
   const avatarUrl = user.user_metadata?.avatar_url || 
                    user.user_metadata?.picture || 
@@ -138,6 +156,9 @@ function App() {
                    user.user_metadata?.name || 
                    user.email?.split('@')[0] || 
                    'User';
+
+  const showDetailView = settings.viewMode === 'detail' && selectedEmail;
+  const showListView = settings.viewMode === 'list' || !selectedEmail;
 
   return (
     <div className="h-screen flex bg-gray-50">
@@ -153,7 +174,6 @@ function App() {
                 alt={userName}
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  // Fallback if image fails to load
                   e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email || 'User')}&background=3b82f6&color=fff`;
                 }}
               />
@@ -270,87 +290,105 @@ function App() {
               <span className="text-sm font-medium">Auto-Pilot</span>
             </Toggle.Root>
           </div>
-          <button className="p-2 hover:bg-gray-100 rounded-lg">
-            <Settings size={20} className="text-gray-600" />
+          <button 
+            className="p-2 hover:bg-gray-100 rounded-lg"
+            onClick={() => setIsSettingsOpen(true)}
+          >
+            <SettingsIcon size={20} className="text-gray-600" />
           </button>
         </header>
 
-        {/* Email List */}
-        <div className="flex-1 overflow-auto p-6 bg-gray-50">
-          {emailsLoading ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading emails...</p>
-              </div>
-            </div>
-          ) : error ? (
-            <div className="text-center text-red-600 bg-red-50 p-4 rounded-lg">
-              Error loading emails: {error.message}
-            </div>
-          ) : emails.length === 0 ? (
-            <div className="text-center text-gray-500 bg-white p-8 rounded-lg">
-              <Mail size={48} className="mx-auto mb-4 text-gray-300" />
-              <h3 className="text-lg font-medium mb-2">No emails found</h3>
-              <p>Your inbox is empty or still loading.</p>
-            </div>
-          ) : (
-            <Masonry
-              breakpointCols={breakpointColumns}
-              className="flex -ml-6 w-auto"
-              columnClassName="pl-6 bg-clip-padding"
-            >
-              {emails.map((email) => {
-                const emailTag = colorTags.find(t => t.id === email.tag);
-                return (
-                  <div
-                    key={email.id}
-                    className="mb-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-200 cursor-pointer"
-                  >
-                    <div className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          {email.unread && (
-                            <div className="w-2 h-2 rounded-full bg-blue-600" />
-                          )}
-                          <span className={`font-medium ${email.unread ? 'text-gray-900' : 'text-gray-600'}`}>
-                            {email.sender}
-                          </span>
-                          {emailTag && (
-                            <div className={`px-2 py-0.5 rounded-full text-xs text-white ${emailTag.color}`}>
-                              {emailTag.name}
-                            </div>
-                          )}
-                        </div>
-                        <span className="text-sm text-gray-500">
-                          {format(new Date(email.date), 'MMM d, h:mm a')}
-                        </span>
-                      </div>
-                      <h3 className={`mb-2 ${email.unread ? 'font-semibold text-gray-900' : 'text-gray-600'}`}>
-                        {email.subject}
-                      </h3>
-                      <p className="text-sm text-gray-500 line-clamp-3">
-                        {email.preview}
-                      </p>
-                    </div>
-                    <div className="px-4 py-3 bg-gray-50 flex justify-end gap-2">
-                      <button className="p-1 hover:bg-gray-200 rounded transition-colors">
-                        <Archive size={16} className="text-gray-600" />
-                      </button>
-                      <button className="p-1 hover:bg-gray-200 rounded transition-colors">
-                        <Star size={16} className="text-gray-600" />
-                      </button>
-                      <button className="p-1 hover:bg-gray-200 rounded transition-colors">
-                        <Trash size={16} className="text-gray-600" />
-                      </button>
+        {/* Email Content Area */}
+        <div className="flex-1 flex overflow-hidden">
+          {settings.viewMode === 'detail' ? (
+            <>
+              {/* Email List Sidebar for Detail View */}
+              <div className="w-96 border-r border-gray-200 overflow-y-auto p-4 bg-gray-50">
+                {emailsLoading ? (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                      <p className="text-gray-600">Loading emails...</p>
                     </div>
                   </div>
-                );
-              })}
-            </Masonry>
+                ) : error ? (
+                  <div className="text-center text-red-600 bg-red-50 p-4 rounded-lg">
+                    Error loading emails: {error.message}
+                  </div>
+                ) : emails.length === 0 ? (
+                  <div className="text-center text-gray-500 bg-white p-8 rounded-lg">
+                    <Mail size={48} className="mx-auto mb-4 text-gray-300" />
+                    <h3 className="text-lg font-medium mb-2">No emails found</h3>
+                    <p>Your inbox is empty or still loading.</p>
+                  </div>
+                ) : (
+                  <EmailList 
+                    emails={emails} 
+                    settings={{ ...settings, emailLayout: 'traditional' }}
+                    colorTags={colorTags}
+                    onEmailSelect={handleEmailSelect}
+                    selectedEmailId={selectedEmail?.id}
+                  />
+                )}
+              </div>
+              
+              {/* Email Detail Panel */}
+              <div className="flex-1">
+                {selectedEmail ? (
+                  <EmailDetail 
+                    email={selectedEmail} 
+                    onBack={handleBackToList}
+                  />
+                ) : (
+                  <div className="h-full flex items-center justify-center text-gray-500">
+                    <div className="text-center">
+                      <Mail size={48} className="mx-auto mb-4 text-gray-300" />
+                      <p>Select an email to view details</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            /* List View - Full Width */
+            <div className="flex-1 overflow-auto p-6 bg-gray-50">
+              {emailsLoading ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading emails...</p>
+                  </div>
+                </div>
+              ) : error ? (
+                <div className="text-center text-red-600 bg-red-50 p-4 rounded-lg">
+                  Error loading emails: {error.message}
+                </div>
+              ) : emails.length === 0 ? (
+                <div className="text-center text-gray-500 bg-white p-8 rounded-lg">
+                  <Mail size={48} className="mx-auto mb-4 text-gray-300" />
+                  <h3 className="text-lg font-medium mb-2">No emails found</h3>
+                  <p>Your inbox is empty or still loading.</p>
+                </div>
+              ) : (
+                <EmailList 
+                  emails={emails} 
+                  settings={settings}
+                  colorTags={colorTags}
+                  onEmailSelect={handleEmailSelect}
+                />
+              )}
+            </div>
           )}
         </div>
       </div>
+
+      {/* Settings Modal */}
+      <Settings
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        settings={settings}
+        onSettingsChange={setSettings}
+      />
     </div>
   );
 }
